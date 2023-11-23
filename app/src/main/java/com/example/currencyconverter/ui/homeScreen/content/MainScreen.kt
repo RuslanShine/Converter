@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,18 +61,20 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreen(context: Context, viewModel: HomeViewModel) {
-
-
     val keyboardController = LocalSoftwareKeyboardController.current
+
+
+    val uiStateListInputCurrency by viewModel.inputCurrencyUIState.collectAsState()
+
     val listСurrencyName =
         EnumСurrency.values().map { it.nameCurrency } + stringResource(R.string.choose_currency)
 
-    val listСurrencyInput = listСurrencyName
-    val inputNumber = remember { mutableStateOf(false) }
-    val currentInputCurrency = remember { mutableStateOf(listСurrencyInput[41]) }
-    var currencyNameInput by remember { mutableStateOf("") }
+    val listСurrencyInput = uiStateListInputCurrency.listInputCurrency
+    var inputNumber = uiStateListInputCurrency.inputNumber
+    var currentInputCurrency = uiStateListInputCurrency.listInputCurrency
+    var currencyNameInput = uiStateListInputCurrency.currencyNameInput
 
-    val listСurrencyOutput = listСurrencyName
+    val listСurrencyOutput = uiStateListInputCurrency.listInputCurrency
     val outputNumber = remember { mutableStateOf(false) }
     val currentOutputCurrency = remember { mutableStateOf(listСurrencyOutput[41]) }
     var currencyNameOutput by remember { mutableStateOf("") }
@@ -125,10 +128,10 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                             contentAlignment = Alignment.TopCenter
                         ) {
                             Row(modifier = Modifier.clickable {
-                                inputNumber.value = !inputNumber.value
+                                viewModel.openMenu()
                             }, verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = currentInputCurrency.value,
+                                    text = currentInputCurrency[1].nameCurrency,
                                     fontSize = FontSizes._18,
                                     color = Color.Black
                                 )
@@ -136,17 +139,19 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                     imageVector = Icons.Filled.ArrowDropDown,
                                     contentDescription = null
                                 )
-                                DropdownMenu(expanded = inputNumber.value,
-                                    onDismissRequest = { inputNumber.value = false }) {
+                                DropdownMenu(expanded = inputNumber,
+                                    onDismissRequest = { viewModel.closeMenu() }) {
                                     listСurrencyInput.forEach {
                                         DropdownMenuItem(
-                                            text = { Text(text = it) },
+                                            text = { Text(text = it.nameCurrency ) },
                                             onClick = {
-                                                currentInputCurrency.value = it
-                                                inputNumber.value = false
+                                                currentInputCurrency = it
 
-                                                viewModel.searchFromValRecalculating(it)
-                                                viewModel.searchValueFromVal(it)
+                                                viewModel.closeMenu()
+
+
+//                                                viewModel.searchFromValRecalculating(it)
+//                                                viewModel.searchValueFromVal(it)
                                             },
                                             modifier = Modifier.background(Color.White),
                                         )
@@ -217,7 +222,7 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                 outputNumber.value = !outputNumber.value
                             }, verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = currentOutputCurrency.value,
+                                    text = currentOutputCurrency.value.nameCurrency,
                                     fontSize = FontSizes._18,
                                     color = Color.Black
                                 )
@@ -229,13 +234,13 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                     onDismissRequest = { outputNumber.value = false }) {
                                     listСurrencyOutput.forEach {
                                         DropdownMenuItem(
-                                            text = { Text(text = it) },
+                                            text = { Text(text = it.nameCurrency) },
                                             onClick = {
                                                 currentOutputCurrency.value = it
                                                 outputNumber.value = false
 
-                                                viewModel.searchToValRecalculating(it)
-                                                viewModel.searchValueToVal(it)
+//                                                viewModel.searchToValRecalculating(it)
+//                                                viewModel.searchValueToVal(it)
                                             },
                                             modifier = Modifier.background(Color.White)
                                         )
@@ -290,24 +295,24 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                 ) {
                     Button(
                         onClick = {
-                            if (currentInputCurrency.value != listСurrencyInput[41]) {
-                                if (currentOutputCurrency.value != listСurrencyInput[41]) {
-                                    currencyNameOutput = if (currencyNameInput.isNotEmpty()) {
-                                        val resultFinish = viewModel.recalculatingValues(currencyNameInput)
-                                        String.format("%.3f", resultFinish)
-                                    } else {
-                                        "0"
-                                    }
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        R.string.select_conversion_currency, Toast.LENGTH_SHORT).show()
-                                }
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    R.string.select_convertible_currency, Toast.LENGTH_SHORT).show()
-                            }
+//                            if (currentInputCurrency != listСurrencyInput[41]) {
+//                                if (currentOutputCurrency.value != listСurrencyInput[41]) {
+//                                    currencyNameOutput = if (currencyNameInput.isNotEmpty()) {
+//                                        val resultFinish = viewModel.recalculatingValues(currencyNameInput)
+//                                        String.format("%.3f", resultFinish)
+//                                    } else {
+//                                        "0"
+//                                    }
+//                                } else {
+//                                    Toast.makeText(
+//                                        context,
+//                                        R.string.select_conversion_currency, Toast.LENGTH_SHORT).show()
+//                                }
+//                            } else {
+//                                Toast.makeText(
+//                                    context,
+//                                    R.string.select_convertible_currency, Toast.LENGTH_SHORT).show()
+//                            }
                             keyboardController?.hide()
                         },
                         modifier = Modifier.width(Dimens._320),
