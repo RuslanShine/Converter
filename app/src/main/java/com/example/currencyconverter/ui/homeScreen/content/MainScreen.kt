@@ -33,9 +33,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -59,16 +56,7 @@ import com.example.currencyconverter.ui.homeScreen.HomeViewModel
 @Composable
 fun MainScreen(context: Context, viewModel: HomeViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
-
-
-    val uiStateListInputCurrency by viewModel.inputCurrencyUIState.collectAsState()
-
-
-    val listСurrencyOutput = uiStateListInputCurrency.listInputCurrency
-    val outputNumber = remember { mutableStateOf(false) }
-    val currentOutputCurrency = remember { mutableStateOf(listСurrencyOutput[41]) }
-    var currencyNameOutput by remember { mutableStateOf("") }
-
+    val uiStateListInputCurrency by viewModel.currencyUIState.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -118,10 +106,13 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                             contentAlignment = Alignment.TopCenter
                         ) {
                             Row(modifier = Modifier.clickable {
-                                viewModel.openMenu()
+                                viewModel.openMenuInputCurrency()
                             }, verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = EnumСurrency.enumToString(uiStateListInputCurrency.inputNameCurrency, context),
+                                    text = EnumСurrency.enumToString(
+                                        uiStateListInputCurrency.inputNameCurrency,
+                                        context
+                                    ),
                                     fontSize = FontSizes._18,
                                     color = Color.Black
                                 )
@@ -130,14 +121,21 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                     contentDescription = null
                                 )
                                 DropdownMenu(expanded = uiStateListInputCurrency.inputMenuPosition,
-                                    onDismissRequest = { viewModel.closeMenu() }) {
+                                    onDismissRequest = { viewModel.closeMenuInputCurrency() }) {
                                     uiStateListInputCurrency.listInputCurrency.forEach {
                                         DropdownMenuItem(
-                                            text = { Text(text = EnumСurrency.enumToString(it, context ) ) },
+                                            text = {
+                                                Text(
+                                                    text = EnumСurrency.enumToString(
+                                                        it,
+                                                        context
+                                                    )
+                                                )
+                                            },
                                             onClick = {
                                                 viewModel.setInputCurrency(it)
 
-                                                viewModel.closeMenu()
+                                                viewModel.closeMenuInputCurrency()
 
 
 //                                                viewModel.searchFromValRecalculating(it)
@@ -209,10 +207,13 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                             contentAlignment = Alignment.TopCenter
                         ) {
                             Row(modifier = Modifier.clickable {
-                                outputNumber.value = !outputNumber.value
+                                viewModel.openMenuOutputCurrency()
                             }, verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "currentOutputCurrency.value.nameCurrency",
+                                    text = EnumСurrency.enumToString(
+                                        uiStateListInputCurrency.outputNameCurrency,
+                                        context
+                                    ),
                                     fontSize = FontSizes._18,
                                     color = Color.Black
                                 )
@@ -220,14 +221,22 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                     imageVector = Icons.Filled.ArrowDropDown,
                                     contentDescription = null
                                 )
-                                DropdownMenu(expanded = outputNumber.value,
-                                    onDismissRequest = { outputNumber.value = false }) {
-                                    listСurrencyOutput.forEach {
+                                DropdownMenu(expanded = uiStateListInputCurrency.outputMenuPosition,
+                                    onDismissRequest = { viewModel.closeMenuOutputCurrency() }) {
+                                    uiStateListInputCurrency.listOutputCurrency.forEach {
                                         DropdownMenuItem(
-                                            text = { Text(text = "it.nameCurrency") },
+                                            text = {
+                                                Text(
+                                                    text = EnumСurrency.enumToString(
+                                                        it,
+                                                        context
+                                                    )
+                                                )
+                                            },
                                             onClick = {
-                                                currentOutputCurrency.value = it
-                                                outputNumber.value = false
+                                                viewModel.setOutputCurrency(it)
+
+                                                viewModel.closeMenuOutputCurrency()
 
 //                                                viewModel.searchToValRecalculating(it)
 //                                                viewModel.searchValueToVal(it)
@@ -251,8 +260,8 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                 fontSize = FontSizes._24,
                                 color = Color.Black
                             )
-                            OutlinedTextField(value = currencyNameOutput,
-                                onValueChange = { currencyNameOutput = it },
+                            OutlinedTextField(value = uiStateListInputCurrency.outputCurrencyValue,
+                                onValueChange = { viewModel.setOutputCurrencyValue(it) },
                                 modifier = Modifier.width(Dimens._240),
                                 textStyle = androidx.compose.ui.text.TextStyle(
                                     fontSize = FontSizes._24
@@ -269,7 +278,7 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                         contentDescription = stringResource(R.string.clear_text),
                                         modifier = Modifier
                                             .clickable {
-                                                currencyNameOutput = ""
+                                                viewModel.setEmptyOutputCurrencyValue()
                                             }
                                     )
                                 }

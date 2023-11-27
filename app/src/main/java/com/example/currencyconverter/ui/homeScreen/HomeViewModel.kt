@@ -8,7 +8,7 @@ import com.example.currencyconverter.data.entity.Currencies
 import com.example.currencyconverter.domain.enums.EnumСurrency
 import com.example.currencyconverter.domain.usecases.RecalculatingValuesСhoiceUseCase
 import com.example.currencyconverter.domain.usecases.SetCharCodeValuesUseCase
-import com.example.currencyconverter.ui.homeScreen.model.InputCurrencyUIState
+import com.example.currencyconverter.ui.homeScreen.model.CurrencyUIState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +23,19 @@ class HomeViewModel @Inject constructor(val repository: DataRepository) : ViewMo
     private val _valuesData: Flow<List<Currencies>>
     val valuesData get() = _valuesData
 
-    val inputCurrencyUIState: StateFlow<InputCurrencyUIState> get() = _inputCurrencyUIState.asStateFlow()
-    private val _inputCurrencyUIState = MutableStateFlow(InputCurrencyUIState(listOf(), EnumСurrency.AED, false, ""))
+    val currencyUIState: StateFlow<CurrencyUIState> get() = _currencyUIState.asStateFlow()
+    private val _currencyUIState = MutableStateFlow(
+        CurrencyUIState(
+            listInputCurrency = listOf(),
+            inputNameCurrency = EnumСurrency.AED,
+            inputMenuPosition = false,
+            inputCurrencyValue = "",
+            listOutputCurrency = listOf(),
+            outputNameCurrency = EnumСurrency.AED,
+            outputMenuPosition = false,
+            outputCurrencyValue = ""
+        )
+    )
 
     init {
         _valuesData = repository.getCurrenciesFromDb()
@@ -39,7 +50,11 @@ class HomeViewModel @Inject constructor(val repository: DataRepository) : ViewMo
         viewModelScope.launch {
 
             _valuesData.collect { it ->
-                _inputCurrencyUIState.value.listInputCurrency = it.map {
+                _currencyUIState.value.listInputCurrency = it.map {
+                    EnumСurrency.valueOf(it.charCode)
+                }
+
+                _currencyUIState.value.listOutputCurrency = it.map {
                     EnumСurrency.valueOf(it.charCode)
                 }
             }
@@ -54,12 +69,12 @@ class HomeViewModel @Inject constructor(val repository: DataRepository) : ViewMo
         }
     }
 
-    fun openMenu() {
-        _inputCurrencyUIState.update { it.copy(inputMenuPosition = true) }
+    fun openMenuInputCurrency() {
+        _currencyUIState.update { it.copy(inputMenuPosition = true) }
     }
 
-    fun closeMenu() {
-        _inputCurrencyUIState.update { it.copy(inputMenuPosition = false) }
+    fun closeMenuInputCurrency() {
+        _currencyUIState.update { it.copy(inputMenuPosition = false) }
     }
 
 
@@ -93,14 +108,37 @@ class HomeViewModel @Inject constructor(val repository: DataRepository) : ViewMo
 
 
     fun setInputCurrency(name: EnumСurrency) {
-        _inputCurrencyUIState.update { it.copy(inputNameCurrency = name) }
+        _currencyUIState.update { it.copy(inputNameCurrency = name) }
     }
 
     fun setInputCurrencyValue(value: String) {
-        _inputCurrencyUIState.update { it.copy(inputCurrencyValue = value) }
+        _currencyUIState.update { it.copy(inputCurrencyValue = value) }
     }
 
     fun setEmptyInputCurrencyValue() {
-        _inputCurrencyUIState.update { it.copy(inputCurrencyValue = "") }
+        _currencyUIState.update { it.copy(inputCurrencyValue = "") }
     }
+
+
+    fun openMenuOutputCurrency() {
+        _currencyUIState.update { it.copy(outputMenuPosition = true) }
+    }
+
+    fun closeMenuOutputCurrency() {
+        _currencyUIState.update { it.copy(outputMenuPosition = false) }
+    }
+
+    fun setOutputCurrency(name: EnumСurrency) {
+        _currencyUIState.update { it.copy(outputNameCurrency = name) }
+    }
+
+    fun setOutputCurrencyValue(value: String) {
+        _currencyUIState.update { it.copy(outputCurrencyValue = value) }
+    }
+
+    fun setEmptyOutputCurrencyValue() {
+        _currencyUIState.update { it.copy(outputCurrencyValue = "") }
+    }
+
+
 }
