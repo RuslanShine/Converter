@@ -1,9 +1,12 @@
 package com.example.currencyconverter.ui.homeScreen.model
 
+import com.example.currencyconverter.domain.enums.EnumСurrency
+
 data class InputCurrencyUIState(
-    var listInputCurrency: List<ItemInputCurrency>,
-    var inputNumber:Boolean,
-    var currencyNameInput:String
+    var listInputCurrency: List<EnumСurrency>,
+    val inputNameCurrency:EnumСurrency = EnumСurrency.AED,
+    val inputMenuPosition:Boolean,
+    val inputCurrencyValue:String
 
 
 )

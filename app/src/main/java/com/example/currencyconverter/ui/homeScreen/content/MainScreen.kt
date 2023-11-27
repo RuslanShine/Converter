@@ -2,7 +2,6 @@ package com.example.currencyconverter.ui.homeScreen.content
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +35,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -54,7 +52,6 @@ import com.example.currencyconverter.theme.FontSizes
 import com.example.currencyconverter.theme.Purple40
 import com.example.currencyconverter.theme.Purple80
 import com.example.currencyconverter.ui.homeScreen.HomeViewModel
-import kotlinx.coroutines.launch
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -66,13 +63,6 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
 
     val uiStateListInputCurrency by viewModel.inputCurrencyUIState.collectAsState()
 
-    val listСurrencyName =
-        EnumСurrency.values().map { it.nameCurrency } + stringResource(R.string.choose_currency)
-
-    val listСurrencyInput = uiStateListInputCurrency.listInputCurrency
-    var inputNumber = uiStateListInputCurrency.inputNumber
-    var currentInputCurrency = uiStateListInputCurrency.listInputCurrency
-    var currencyNameInput = uiStateListInputCurrency.currencyNameInput
 
     val listСurrencyOutput = uiStateListInputCurrency.listInputCurrency
     val outputNumber = remember { mutableStateOf(false) }
@@ -131,7 +121,7 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                 viewModel.openMenu()
                             }, verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = currentInputCurrency[1].nameCurrency,
+                                    text = EnumСurrency.enumToString(uiStateListInputCurrency.inputNameCurrency, context),
                                     fontSize = FontSizes._18,
                                     color = Color.Black
                                 )
@@ -139,13 +129,13 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                     imageVector = Icons.Filled.ArrowDropDown,
                                     contentDescription = null
                                 )
-                                DropdownMenu(expanded = inputNumber,
+                                DropdownMenu(expanded = uiStateListInputCurrency.inputMenuPosition,
                                     onDismissRequest = { viewModel.closeMenu() }) {
-                                    listСurrencyInput.forEach {
+                                    uiStateListInputCurrency.listInputCurrency.forEach {
                                         DropdownMenuItem(
-                                            text = { Text(text = it.nameCurrency ) },
+                                            text = { Text(text = EnumСurrency.enumToString(it, context ) ) },
                                             onClick = {
-                                                currentInputCurrency = it
+                                                viewModel.setInputCurrency(it)
 
                                                 viewModel.closeMenu()
 
@@ -172,8 +162,8 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                 fontSize = FontSizes._24,
                                 color = Color.Black
                             )
-                            OutlinedTextField(value = currencyNameInput,
-                                onValueChange = { currencyNameInput = it },
+                            OutlinedTextField(value = uiStateListInputCurrency.inputCurrencyValue,
+                                onValueChange = { viewModel.setInputCurrencyValue(it) },
 
                                 modifier = Modifier.width(Dimens._240),
                                 textStyle = androidx.compose.ui.text.TextStyle(
@@ -191,7 +181,7 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                         contentDescription = stringResource(R.string.clear_text),
                                         modifier = Modifier
                                             .clickable {
-                                                currencyNameInput = ""
+                                                viewModel.setEmptyInputCurrencyValue()
                                             }
                                     )
                                 }
@@ -222,7 +212,7 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                 outputNumber.value = !outputNumber.value
                             }, verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = currentOutputCurrency.value.nameCurrency,
+                                    text = "currentOutputCurrency.value.nameCurrency",
                                     fontSize = FontSizes._18,
                                     color = Color.Black
                                 )
@@ -234,7 +224,7 @@ fun MainScreen(context: Context, viewModel: HomeViewModel) {
                                     onDismissRequest = { outputNumber.value = false }) {
                                     listСurrencyOutput.forEach {
                                         DropdownMenuItem(
-                                            text = { Text(text = it.nameCurrency) },
+                                            text = { Text(text = "it.nameCurrency") },
                                             onClick = {
                                                 currentOutputCurrency.value = it
                                                 outputNumber.value = false
